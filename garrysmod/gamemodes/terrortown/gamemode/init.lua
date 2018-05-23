@@ -72,6 +72,7 @@ CreateConVar("ttt_haste_minutes_per_death", "0.5", FCVAR_NOTIFY)
 CreateConVar("ttt_spawn_wave_interval", "0")
 
 CreateConVar("ttt_traitor_pct", "0.25")
+CreateConVar("ttt_traitor_pct_max", "0.5")
 CreateConVar("ttt_traitor_max", "32")
 
 CreateConVar("ttt_detective_pct", "0.13", FCVAR_NOTIFY)
@@ -816,14 +817,16 @@ function GM:TTTCheckForWin()
 end
 
 local function GetTraitorCount(ply_count)
-   -- get number of traitors: pct of players rounded down
-   local traitor_count = math.floor(ply_count * GetConVar("ttt_traitor_pct"):GetFloat())
-   -- make sure there is at least 1 traitor
-   traitor_count = math.Clamp(traitor_count, 1, GetConVar("ttt_traitor_max"):GetInt())
-
-   return traitor_count
+    -- get the difference between ttt_traitor_pct and traitor_pct_max as a positive real number
+    local traitor_pct_range = math.abs((GetConVar("ttt_traitor_pct_max"):GetFloat() - GetConVar('ttt_traitor_pct'):GetFloat()) * 100)
+    -- choose a random value in the traitor percentage range
+    local traitor_random = (math.random(0, traitor_pct_range) + 1) / 100
+    -- get number of traitors: pct of players rounded down (with our additional random traitors)
+    local traitor_count = math.floor(ply_count * (GetConVar("ttt_traitor_pct"):GetFloat() + traitor_random))
+    -- make sure there is at least 1 traitor
+    traitor_count = math.Clamp(traitor_count, 1, GetConVar("ttt_traitor_max"):GetInt())
+    return traitor_count
 end
-
 
 local function GetDetectiveCount(ply_count)
    if ply_count < GetConVar("ttt_detective_min_players"):GetInt() then return 0 end
