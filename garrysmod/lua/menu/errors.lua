@@ -9,7 +9,7 @@ local Errors = {}
 
 hook.Add( "OnLuaError", "MenuErrorHandler", function( str, realm, addontitle, addonid )
 
-	local text = "Something is creating script errors"
+	local text = language.GetPhrase( "errors.something" )
 
 	--
 	-- This error is caused by a specific addon
@@ -30,7 +30,7 @@ hook.Add( "OnLuaError", "MenuErrorHandler", function( str, realm, addontitle, ad
 		--	steamworks.ApplyAddons()
 		--end )
 
-		text = "The addon \"" .. addontitle .. "\" is creating errors, check the console for details"
+		text = string.format( language.GetPhrase( "errors.addon" ), addontitle )
 
 	end
 
@@ -61,7 +61,7 @@ local matAlert = Material( "icon16/error.png" )
 
 hook.Add( "DrawOverlay", "MenuDrawLuaErrors", function()
 
-	if ( table.Count( Errors ) == 0 ) then return end
+	if ( table.IsEmpty( Errors ) ) then return end
 
 	local idealy = 32
 	local height = 30
@@ -96,7 +96,7 @@ hook.Add( "DrawOverlay", "MenuDrawLuaErrors", function()
 		idealy = idealy + 40
 
 		if ( v.last < EndTime ) then
-			Errors[k] = nil
+			Errors[ k ] = nil
 		end
 
 	end

@@ -97,7 +97,16 @@ end
 
 function PANEL:StatusChanged( strStatus )
 
-	if ( string.find( strStatus, "Downloading " ) ) then
+	local startPos, endPos = string.find( strStatus, "Downloading " )
+	if ( startPos ) then
+		-- Snip everything before the Download part
+		strStatus = string.sub( strStatus, startPos )
+
+		-- Special case needed for workshop, snip the "' via Workshop" part
+		if ( string.EndsWith( strStatus, "via Workshop" ) ) then
+			strStatus = string.gsub( strStatus, "' via Workshop", "" )
+			strStatus = string.gsub( strStatus, "Downloading '", "" ) -- We need to handle the quote marks
+		end
 
 		local Filename = string.gsub( strStatus, "Downloading ", "" )
 
@@ -194,6 +203,17 @@ function GetLoadPanel()
 
 end
 
+
+function IsInLoading()
+
+	if ( !IsValid( pnlLoading ) || !IsValid( pnlLoading.HTML ) ) then
+		return false
+	end
+
+	return true
+
+end
+
 function UpdateLoadPanel( strJavascript )
 
 	if ( !pnlLoading ) then return end
@@ -223,7 +243,7 @@ function GameDetails( servername, serverurl, mapname, maxplayers, steamid, gamem
 	serverurl = serverurl:Replace( "%s", steamid )
 	serverurl = serverurl:Replace( "%m", mapname )
 
-	if ( maxplayers > 1 ) then
+	if ( maxplayers > 1 && GetConVar( "cl_enable_loadingurl" ):GetBool() ) then
 		pnlLoading:ShowURL( serverurl, true )
 	end
 
